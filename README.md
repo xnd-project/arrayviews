@@ -2,11 +2,11 @@
 
 ## Matrix of supported array views - host memory
 
-The following table summarizes the support of creating an array
-storage view (in left-hand-side column) of some other array storage
-object (in top-column). The table cells contains two answers
-corresponding to array objects without or with nulls. In the case of
-`numpy.ndarray`, the `nan` values are interpreted as nulls.
+The following table summarizes the support of creating a specific array
+view (left-hand-side column) of given array storage
+object (top-row). The table cells contains two answers
+corresponding to if the view can be created from an array object without or with nulls, respectively.
+In the case of `numpy.ndarray`, the `nan` values are interpreted as nulls.
 
 <table style="width:100%">
   <tr>
