@@ -137,6 +137,7 @@ objects (left-hand-side column).
 
 1. The numbers in the table are `<elapsed time to create a view of an obj>/<elapsed time to call 'def dummy(obj): return obj'>`.
 2. Results in the parenthesis correspond to objects with nulls or nans. No attempts are made to convert nans to nulls. 
+3. Test arrays are 64-bit float arrays of size 10000.
 
 ## Matrix of supported array views - CUDA device memory
 
