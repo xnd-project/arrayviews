@@ -28,11 +28,10 @@ def numpy_ndarray(xd_arr):
 def pandas_series(xd_arr):
     """Return pandas.Series view of a xnd.xnd
     """
+    import numpy as np
     import pandas as pd
     if not xd_arr.dtype.isoptional():
-        return pd.Series(memoryview(xd_arr),
-                         dtype=str(xd_arr.dtype),
-                         copy=False)
+        return pd.Series(np.array(xd_arr, copy=False), copy=False)
     raise NotImplementedError(
         'pandas.Series view of xnd.xnd with optional values')
 

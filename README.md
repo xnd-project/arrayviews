@@ -90,14 +90,13 @@ objects (left-hand-side column).
     raise NotImplementedError(
         'numpy.ndarray view of xnd.xnd with optional values')
 ">OPTIMAL, PARTIAL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/xnd_xnd_as.py#L28 title="def pandas_series(xd_arr):
+    import numpy as np
     import pandas as pd
     if not xd_arr.dtype.isoptional():
-        return pd.Series(memoryview(xd_arr),
-                         dtype=str(xd_arr.dtype),
-                         copy=False)
+        return pd.Series(np.array(xd_arr, copy=False), copy=False)
     raise NotImplementedError(
         'pandas.Series view of xnd.xnd with optional values')
-">OPTIMAL, PARTIAL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/xnd_xnd_as.py#L40 title="def pyarrow_array(xd_arr):
+">OPTIMAL, PARTIAL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/xnd_xnd_as.py#L39 title="def pyarrow_array(xd_arr):
     import pyarrow as pa
     if not xd_arr.dtype.isoptional():
         pa_buf = pa.py_buffer(memoryview(xd_arr))
@@ -126,10 +125,10 @@ objects (left-hand-side column).
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td>0.99(1.0)</td><td>577.15(551.05)</td><td>35.95(32.05)</td><td>15.97(15.52)</td></tr>
-<tr><th>pandas.Series</th><td>38.63(38.51)</td><td>1.01(0.92)</td><td>100.86(98.74)</td><td>57.67(57.56)</td></tr>
-<tr><th>pyarrow.Array</th><td>17.02(N/A)</td><td>648.22(N/A)</td><td>0.99(0.98)</td><td>36.59(N/A)</td></tr>
-<tr><th>xnd.xnd</th><td>15.85(N/A)</td><td>1162.02(N/A)</td><td>58.78(N/A)</td><td>0.97(0.99)</td></tr>
+<tr><th>numpy.ndarray</th><td>1.0(1.0)</td><td>599.95(575.71)</td><td>41.91(34.53)</td><td>16.21(16.03)</td></tr>
+<tr><th>pandas.Series</th><td>45.47(48.54)</td><td>1.03(0.93)</td><td>114.72(108.34)</td><td>61.86(69.96)</td></tr>
+<tr><th>pyarrow.Array</th><td>18.34(N/A)</td><td>648.69(N/A)</td><td>1.0(1.03)</td><td>37.96(N/A)</td></tr>
+<tr><th>xnd.xnd</th><td>16.76(N/A)</td><td>665.43(N/A)</td><td>62.82(N/A)</td><td>1.01(1.01)</td></tr>
 </table>
 <!--END arrayviews-measure_kernel TABLE-->
 
