@@ -24,6 +24,8 @@ target_name_title = dict(
     pandas_series='pandas.Series',
     pyarrow_array='pyarrow.Array',
     xnd_xnd='xnd.xnd',
+    pyarrow_cuda_buffer='pyarrow.cuda.CudaBuffer',
+    numba_cuda_DeviceNDArray='numba DeviceNDArray',
 )
 
 
@@ -104,19 +106,24 @@ def measure_kernel(source_module, target_name):
     number = 100000
     size = 10000
     src1 = random(size)
-    src2 = random(size, nulls=True)
-    r1 = timeit.timeit('target_func(obj)', number=number,
+    r1 = timeit.timeit('target_func(obj)', 'target_func(obj)',
+                       number=number,
                        globals=dict(target_func=target_func, obj=src1))
-    try:
-        r2 = timeit.timeit('target_func(obj)', number=number,
-                           globals=dict(target_func=target_func, obj=src2))
-    except NotImplementedError:
-        r2 = None
-    r0 = timeit.timeit('target_func(obj)', number=number,
+    r0 = timeit.timeit('target_func(obj)', 'target_func(obj)',
+                       number=number,
                        globals=dict(target_func=dummy_func, obj=src1))
-    if r2 is None:
-        return f'{round(r1/r0, 2)}(N/A)'
-    return f'{round(r1/r0, 2)}({round(r2/r0, 2)})'
+    args = inspect.getfullargspec(random).args
+    if 'nulls' in args:
+        src2 = random(size, nulls=True)
+        try:
+            r2 = timeit.timeit('target_func(obj)', number=number,
+                               globals=dict(target_func=target_func, obj=src2))
+        except NotImplementedError:
+            r2 = None
+        if r2 is None:
+            return f'{round(r1/r0, 2)}(N/A)'
+        return f'{round(r1/r0, 2)}({round(r2/r0, 2)})'
+    return f'{round(r1/r0, 2)}'
 
 
 def update_README_md(package, path):
@@ -125,7 +132,7 @@ def update_README_md(package, path):
     f.close()
 
     for kernel in [support_kernel, measure_kernel]:
-        table = make_viewmatrix_table(arrayviews, kernel)
+        table = make_viewmatrix_table(package, kernel)
         first_line = table.split("\n", 1)[0]
         last_line = table.rsplit("\n", 1)[-1]
         i0 = content.find(first_line)
@@ -145,5 +152,7 @@ def update_README_md(package, path):
 if __name__ == '__main__':
     import os
     import arrayviews
-    update_README_md(arrayviews, path=os.path.join(os.path.dirname(__file__),
-                                                   '..', 'README.md'))
+    import arrayviews.cuda
+    path = os.path.join(os.path.dirname(__file__), '..', 'README.md')
+    update_README_md(arrayviews, path=path)
+    update_README_md(arrayviews.cuda, path=path)

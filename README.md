@@ -119,16 +119,16 @@ objects (left-hand-side column).
 5. `PARTIAL` means that view creation does not support the inputs with null values.
 6. For the implementation of view constructions, hover over table cell or click on the links to `arrayviews` package source code.
 
-### Benchmark: creating array views
+### Benchmark: creating array views - host memory
 
 <!--START arrayviews-measure_kernel TABLE-->
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td>1.0(1.0)</td><td>599.95(575.71)</td><td>41.91(34.53)</td><td>16.21(16.03)</td></tr>
-<tr><th>pandas.Series</th><td>45.47(48.54)</td><td>1.03(0.93)</td><td>114.72(108.34)</td><td>61.86(69.96)</td></tr>
-<tr><th>pyarrow.Array</th><td>18.34(N/A)</td><td>648.69(N/A)</td><td>1.0(1.03)</td><td>37.96(N/A)</td></tr>
-<tr><th>xnd.xnd</th><td>16.76(N/A)</td><td>665.43(N/A)</td><td>62.82(N/A)</td><td>1.01(1.01)</td></tr>
+<tr><th>numpy.ndarray</th><td>1.03(0.99)</td><td>326.28(326.9)</td><td>31.52(31.7)</td><td>15.79(15.61)</td></tr>
+<tr><th>pandas.Series</th><td>30.07(30.07)</td><td>1.01(1.01)</td><td>79.67(79.83)</td><td>48.25(47.86)</td></tr>
+<tr><th>pyarrow.Array</th><td>17.28(N/A)</td><td>348.53(N/A)</td><td>0.98(0.96)</td><td>35.35(N/A)</td></tr>
+<tr><th>xnd.xnd</th><td>13.85(N/A)</td><td>340.09(N/A)</td><td>50.96(N/A)</td><td>0.98(0.97)</td></tr>
 </table>
 <!--END arrayviews-measure_kernel TABLE-->
 
@@ -140,4 +140,36 @@ objects (left-hand-side column).
 
 ## Matrix of supported array views - CUDA device memory
 
-TODO
+<!--START arrayviews.cuda-support_kernel TABLE-->
+<table style="width:100%">
+<tr><th rowspan=2>Objects</th><th colspan="2">Views</th></tr>
+<tr><th>numba DeviceNDArray</th><th>pyarrow.cuda.CudaBuffer</th></tr>
+<tr><th>numba DeviceNDArray</th><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L16 title="def pyarrow_cuda_buffer(nb_arr):
+    import pyarrow.cuda as cuda
+    ctx = cuda.Context()
+    return ctx.buffer_from_object(nb_arr)
+">OPTIMAL, FULL</a></td></tr>
+<tr><th>pyarrow.cuda.CudaBuffer</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/pyarrow_cuda_buffer_as.py#L25 title="def numba_cuda_DeviceNDArray(cbuf):
+    import numpy as np
+    from numba.cuda.cudadrv.devicearray import DeviceNDArray
+    dtype = np.dtype('uint8')
+    return DeviceNDArray((cbuf.size,), (dtype.itemsize,), dtype,
+                         gpu_data=cbuf.to_numba())
+">OPTIMAL, FULL</a></td><td></td></tr>
+</table>
+<!--END arrayviews.cuda-support_kernel TABLE-->
+
+### Benchmark: creating array views - CUDA device memory
+
+<!--START arrayviews.cuda-measure_kernel TABLE-->
+<table style="width:100%">
+<tr><th rowspan=2>Objects</th><th colspan="2">Views</th></tr>
+<tr><th>numba DeviceNDArray</th><th>pyarrow.cuda.CudaBuffer</th></tr>
+<tr><th>numba DeviceNDArray</th><td>1.01</td><td>84.51</td></tr>
+<tr><th>pyarrow.cuda.CudaBuffer</th><td>370.91</td><td>0.99</td></tr>
+</table>
+<!--END arrayviews.cuda-measure_kernel TABLE-->
+
+#### Comments
+
+1. Test arrays are 8-bit unsigned integer arrays of size 10000.
