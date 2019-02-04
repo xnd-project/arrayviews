@@ -22,24 +22,26 @@ In the case of `numpy.ndarray`, the `nan` values are interpreted as nulls.
   </tr>
   <tr>
     <th>numpy.ndarray </th>
-    <td></td> 
+    <td title="use self"></td> 
     <td>yes/yes</td>
     <td>yes/no</td>
-    <td>yes/no</td>
+    <td title="np.frombuffer(memoryview(xd_arr), dtype=str(xd_arr.dtype))">yes/no</td>
   </tr>
   <tr>
     <th>pandas.Series</th>
     <td>yes/yes</td> 
     <td></td>
     <td>yes/yes</td>
-    <td>yes/no</td>
+    <td title=" pd.Series(memoryview(xd_arr), dtype=str(xd_arr.dtype))">yes/no</td>
   </tr>
   <tr>
     <th>pyarrow.Array</th>
     <td>yes/yes</td> 
     <td>yes/yes</td>
     <td></td>
-    <td>yes/no</td>
+    <td title="pa.Array.from_buffers(pa.from_numpy_dtype(str(xd_arr.dtype)),
+            xd_arr.type.datasize//xd_arr.type.itemsize,
+            [None, pa_buf])">yes/no</td>
   </tr>
   <tr>
     <th>xnd.xnd</th>
