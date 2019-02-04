@@ -1,3 +1,12 @@
+from . import numpy_ndarray_as
+
+
+def random(size, nulls=False):
+    """Return random pyarrow.Array instance of 64 bit floats.
+    """
+    return numpy_ndarray_as.pyarrow_array(
+        numpy_ndarray_as.random(size, nulls=nulls))
+
 
 def numpy_ndarray(pa_arr):
     """Return numpy.ndarray view of a pyarrow.Array

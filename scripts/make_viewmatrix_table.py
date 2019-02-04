@@ -27,7 +27,8 @@ target_name_title = dict(
 )
 
 
-def make_viewmatrix_table(package):
+def make_viewmatrix_table(package, kernel):
+    table_name = package.__name__ + '-' + kernel.__name__
 
     target_names = []
     for modulename, module in package.__dict__.items():
@@ -37,7 +38,7 @@ def make_viewmatrix_table(package):
         target_names.append(target_name)
 
     lines = []
-    lines.append(f'<!--START {package.__name__} TABLE-->')
+    lines.append(f'<!--START {table_name} TABLE-->')
     lines.append('<table style="width:100%">')
     lines.append('<tr><th rowspan=2>Objects</th>'
                  f'<th colspan="{len(target_names)}">'
@@ -49,54 +50,95 @@ def make_viewmatrix_table(package):
     row.append('</tr>')
     lines.append(''.join(row))
 
-    for target_name in target_names:
+    for source_name in target_names:
         row = []
-        row.append(f'<tr><th>{target_name_title[target_name]}</th>')
-        for source_name in target_names:
-            source_module = getattr(package, target_name + '_as', None)
-            module_path = '/'.join(source_module.__name__.split('.'))
-            func = source_module.__dict__.get(source_name, None)
-            if target_name == source_name:
-                row.append('<td></td>')
-            elif func is None:
-                row.append('<td>NOT IMPL</td>')
-            else:
-                source_lines, lineno = inspect.getsourcelines(func)
-                source = ''.join(source_lines)
-                result = get_result(source)
-                i0 = source.find('"""')
-                i1 = source.find('"""', i0+1)
-                source = source[:i0].rstrip() + source[i1+3:]
-                link = ('https://github.com/plures/arrayviews/blob/master/'
-                        f'{module_path}.py#L{lineno}')
-                row.append(
-                    f'<td><a href={link} title="{source}">{result}</a></td>')
+        row.append(f'<tr><th>{target_name_title[source_name]}</th>')
+        for target_name in target_names:
+            source_module = getattr(package, source_name + '_as', None)
+            row.append(f'<td>{kernel(source_module, target_name)}</td>')
         row.append('</tr>')
         lines.append(''.join(row))
     lines.append('</table>')
-    lines.append(f'<!--END {package.__name__} TABLE-->')
+    lines.append(f'<!--END {table_name} TABLE-->')
+
     return '\n'.join(lines)
 
 
+def support_kernel(source_module, target_name):
+    source_name = source_module.__name__.split('.')[-1][:-3]
+    if target_name == source_name:
+        return ''
+    target_func = source_module.__dict__.get(target_name, None)
+    if target_func is None:
+        return 'NOT IMPL'
+    module_path = '/'.join(source_module.__name__.split('.'))
+    source_lines, lineno = inspect.getsourcelines(target_func)
+    source = ''.join(source_lines)
+    result = get_result(source)
+    i0 = source.find('"""')
+    i1 = source.find('"""', i0+1)
+    source = source[:i0].rstrip() + source[i1+3:]
+    link = ('https://github.com/plures/arrayviews/blob/master/'
+            f'{module_path}.py#L{lineno}')
+    return f'<a href={link} title="{source}">{result}</a>'
+
+
+def measure_kernel(source_module, target_name):
+    def dummy_func(obj):
+        return obj
+    source_name = source_module.__name__.split('.')[-1][:-3]
+    if target_name == source_name:
+        target_func = dummy_func
+    else:
+        target_func = source_module.__dict__.get(target_name, None)
+    if target_func is None:
+        return 'NOT IMPL'
+
+    random = source_module.__dict__.get('random', None)
+    if random is None:
+        return 'random NOT IMPL'
+
+    number = 100000
+    size = 100
+    src1 = random(size)
+    src2 = random(size, nulls=True)
+    import timeit
+    r1 = timeit.timeit('target_func(obj)', number=number,
+                       globals=dict(target_func=target_func, obj=src1))
+    try:
+        r2 = timeit.timeit('target_func(obj)', number=number,
+                           globals=dict(target_func=target_func, obj=src2))
+    except NotImplementedError:
+        r2 = None
+    r0 = timeit.timeit('target_func(obj)', number=number,
+                       globals=dict(target_func=dummy_func, obj=src1))
+    print(source_name, target_name, r1, r2, r0)
+    if r2 is None:
+        return f'{round(r1/r0, 2)}(N/A)'
+    return f'{round(r1/r0, 2)}({round(r2/r0, 2)})'
+
+
 def update_README_md(package, path):
-    table = make_viewmatrix_table(arrayviews)
-    first_line = table.split("\n", 1)[0]
-    last_line = table.rsplit("\n", 1)[-1]
     f = open(path, 'r')
-    content = f.read()
+    orig_content = content = f.read()
     f.close()
 
-    i0 = content.find(first_line)
-    i1 = content.find(last_line)
+    for kernel in [support_kernel, measure_kernel]:
+        table = make_viewmatrix_table(arrayviews, kernel)
+        first_line = table.split("\n", 1)[0]
+        last_line = table.rsplit("\n", 1)[-1]
+        i0 = content.find(first_line)
+        i1 = content.find(last_line)
+        if i0 >= 0 and i1 > i0:
+            content = content[:i0] + table + content[i1+len(last_line):]
+        else:
+            print(f'Insert `{first_line} {last_line}` to {path} and re-make.')
 
-    if i0 >= 0 and i1 > i0:
-        new_content = content[:i0] + table + content[i1+len(last_line):]
+    if content != orig_content:
         print(f'Updating {path}')
         f = open(path, 'w')
-        f.write(new_content)
+        f.write(content)
         f.close()
-    else:
-        print(f'Insert `{first_line} {last_line}` to {path} and re-make.')
 
 
 if __name__ == '__main__':

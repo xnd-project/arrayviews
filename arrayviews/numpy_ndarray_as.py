@@ -3,6 +3,17 @@
 from .utils import get_bitmap
 
 
+def random(size, nulls=False):
+    """Return random numpy.ndarray instance of 64 bit floats.
+    """
+    import numpy as np
+    r = np.random.random(size)
+    if nulls:
+        idx = np.random.randint(0, r.size, size=max(1, r.size//4))
+        r[idx] = np.nan
+    return r
+
+
 def pyarrow_array(arr):
     """Return pyarrow.Array view of a numpy ndarray.
 

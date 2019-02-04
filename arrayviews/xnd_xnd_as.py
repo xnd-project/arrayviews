@@ -1,3 +1,19 @@
+from . import numpy_ndarray_as
+
+
+def random(size, nulls=False):
+    """Return random xnd.xnd instance of 64 bit floats.
+    """
+    import xnd
+    import numpy as np
+    r = numpy_ndarray_as.random(size, nulls=nulls)
+    if nulls:
+        xr = xnd.xnd(r.tolist(), dtype='?float64')
+        for i in np.where(np.isnan(r))[0]:
+            xr[i] = None
+    return xnd.xnd(r.tolist(), dtype='float64')
+
+
 def numpy_ndarray(xd_arr):
     """Return numpy.ndarray view of a xnd.xnd
     """

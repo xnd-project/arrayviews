@@ -1,4 +1,12 @@
 from .utils import get_bitmap
+from . import numpy_ndarray_as
+
+
+def random(size, nulls=False):
+    """Return random pandas.Series instance of 64 bit floats.
+    """
+    return numpy_ndarray_as.pandas_series(
+        numpy_ndarray_as.random(size, nulls=nulls))
 
 
 def numpy_ndarray(pd_ser):
