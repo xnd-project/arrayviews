@@ -11,6 +11,7 @@ def random(size, nulls=False):
         xr = xnd.xnd(r.tolist(), dtype='?float64')
         for i in np.where(np.isnan(r))[0]:
             xr[i] = None
+        return xr
     return xnd.xnd(r.tolist(), dtype='float64')
 
 
