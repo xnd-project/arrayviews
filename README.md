@@ -3,12 +3,12 @@
 ## Matrix of supported array views - host memory
 
 The following table summarizes the support of creating a specific array
-view (left-hand-side column) for the given array storage
-objects (top-row). 
+view (top-row) for the given array storage
+objects (left-hand-side column). 
 
 <!--START arrayviews TABLE-->
 <table style="width:100%">
-<tr><th rowspan=2>Views</th><th colspan="4">Objects</th></tr>
+<tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
 <tr><th>numpy.ndarray</th><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L28 title="def pandas_series(arr):
     import pandas as pd

@@ -39,9 +39,9 @@ def make_viewmatrix_table(package):
     lines = []
     lines.append(f'<!--START {package.__name__} TABLE-->')
     lines.append('<table style="width:100%">')
-    lines.append('<tr><th rowspan=2>Views</th>'
+    lines.append('<tr><th rowspan=2>Objects</th>'
                  f'<th colspan="{len(target_names)}">'
-                 'Objects</th></tr>')
+                 'Views</th></tr>')
     row = []
     row.append(f'<tr>')
     for source_name in target_names:
