@@ -1,5 +1,5 @@
 
-from . import numpy_ndarray_to
-from . import pandas_series_to
-from . import pyarrow_array_to
-from . import xnd_xnd_to
+from . import numpy_ndarray_as
+from . import pandas_series_as
+from . import pyarrow_array_as
+from . import xnd_xnd_as

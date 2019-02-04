@@ -2,6 +2,7 @@
 """
 from .utils import get_bitmap
 
+
 def pyarrow_array(arr):
     """Return pyarrow.Array view of a numpy ndarray.
 
@@ -19,7 +20,9 @@ def pyarrow_array(arr):
             return pa.Array.from_buffers(pa.from_numpy_dtype(arr.dtype),
                                          arr.size,
                                          [pa_nul, pa.py_buffer(arr)])
-    return pa.Array.from_buffers(pa.from_numpy_dtype(arr.dtype), arr.size, [None, pa.py_buffer(arr)])
+    return pa.Array.from_buffers(pa.from_numpy_dtype(arr.dtype),
+                                 arr.size,
+                                 [None, pa.py_buffer(arr)])
 
 
 def pandas_series(arr):

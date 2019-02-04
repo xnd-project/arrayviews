@@ -18,47 +18,51 @@
 #    contributors may be used to endorse or promote products derived from
 #    this software without specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 
 import os
 import sys
+import builtins
+
 if sys.version_info[:2] < (3, 4):
     raise RuntimeError("Python version >= 3.4 required.")
-import sysconfig
-import builtins
+
 builtins.__ARRAYVIEWS_SETUP__ = True
 
 if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
 
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup
 except ImportError:
-    from distutils.core import setup, Extension
+    from distutils.core import setup
 
 DESCRIPTION = "ArrayViews"
 LONG_DESCRIPTION = """
 ArrayViews provides methods to create specific views to
 various array storage objects"""
 
+
 def setup_package():
     src_path = os.path.dirname(os.path.abspath(sys.argv[0]))
     old_path = os.getcwd()
     os.chdir(src_path)
     sys.path.insert(0, src_path)
-    
+
     metadata = dict(
-       name='arrayviews',
+        name='arrayviews',
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
         license='BSD',
@@ -87,13 +91,14 @@ def setup_package():
         setup_requires=['pytest-runner'],
         tests_require=['pytest'],
     )
-    
+
     try:
         setup(**metadata)
     finally:
         del sys.path[0]
         os.chdir(old_path)
     return
+
 
 if __name__ == '__main__':
     setup_package()
