@@ -65,18 +65,18 @@ objects (left-hand-side column).
             raise NotImplementedError('xnd view of pandas.Series with nans')
     return xnd.xnd.from_buffer(pd_ser.to_numpy())
 ">OPTIMAL, PARTIAL</a></td></tr>
-<tr><th>pyarrow.Array</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L11 title="def numpy_ndarray(pa_arr):
+<tr><th>pyarrow.Array</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L12 title="def numpy_ndarray(pa_arr):
     if pa_arr.null_count == 0:
         return pa_arr.to_numpy()
     pa_nul, pa_buf = pa_arr.buffers()
     raise NotImplementedError('numpy.ndarray view of pyarrow.Array with nulls')
-">OPTIMAL, PARTIAL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L20 title="def pandas_series(pa_arr):
+">OPTIMAL, PARTIAL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L21 title="def pandas_series(pa_arr):
     import pandas as pd
     if pa_arr.null_count == 0:
         return pd.Series(pa_arr.to_numpy(), copy=False)
     pa_nul, pa_buf = pa_arr.buffers()
     raise NotImplementedError('pandas.Series view of pyarrow.Array with nulls')
-">OPTIMAL, PARTIAL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L30 title="def xnd_xnd(pa_arr):
+">OPTIMAL, PARTIAL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L31 title="def xnd_xnd(pa_arr):
     import xnd
     if pa_arr.null_count == 0:
         return xnd.xnd.from_buffer(pa_arr.to_numpy())
@@ -126,10 +126,10 @@ objects (left-hand-side column).
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td>1.01(1.02)</td><td>566.64(549.05)</td><td>38.01(33.38)</td><td>18.13(17.46)</td></tr>
-<tr><th>pandas.Series</th><td>40.35(40.04)</td><td>0.98(1.12)</td><td>98.32(98.07)</td><td>63.33(62.77)</td></tr>
-<tr><th>pyarrow.Array</th><td>17.79(17.19)</td><td>563.38(580.48)</td><td>0.98(0.98)</td><td>42.51(40.9)</td></tr>
-<tr><th>xnd.xnd</th><td>16.72(N/A)</td><td>1201.51(N/A)</td><td>56.94(N/A)</td><td>1.0(1.15)</td></tr>
+<tr><th>numpy.ndarray</th><td>1.0(1.0)</td><td>548.3(517.08)</td><td>39.13(35.22)</td><td>16.28(16.33)</td></tr>
+<tr><th>pandas.Series</th><td>44.77(42.67)</td><td>1.02(0.93)</td><td>105.9(113.67)</td><td>64.42(61.43)</td></tr>
+<tr><th>pyarrow.Array</th><td>18.52(N/A)</td><td>593.04(N/A)</td><td>1.0(1.09)</td><td>37.13(N/A)</td></tr>
+<tr><th>xnd.xnd</th><td>16.16(N/A)</td><td>1092.35(N/A)</td><td>62.04(N/A)</td><td>0.99(0.98)</td></tr>
 </table>
 <!--END arrayviews-measure_kernel TABLE-->
 

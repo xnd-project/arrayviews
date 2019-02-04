@@ -5,7 +5,8 @@ def random(size, nulls=False):
     """Return random pyarrow.Array instance of 64 bit floats.
     """
     return numpy_ndarray_as.pyarrow_array(
-        numpy_ndarray_as.random(size, nulls=nulls))
+        numpy_ndarray_as.random(size, nulls=nulls),
+        nan_to_null=True)
 
 
 def numpy_ndarray(pa_arr):
