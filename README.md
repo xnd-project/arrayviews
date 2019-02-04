@@ -10,13 +10,14 @@ objects (left-hand-side column).
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L39 title="def pandas_series(arr):
+<tr><th>numpy.ndarray</th><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L40 title="def pandas_series(arr, nan_to_null=False):
     import pandas as pd
     return pd.Series(arr, copy=False)
-">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L17 title="def pyarrow_array(arr):
+">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L17 title="def pyarrow_array(arr, nan_to_null=False):
     import numpy as np
     import pyarrow as pa
-    if issubclass(arr.dtype.type, (np.floating, np.complexfloating)):
+    if nan_to_null and issubclass(arr.dtype.type,
+                                  (np.floating, np.complexfloating)):
         isnan = np.isnan(arr)
         if isnan.any():
             pa_nul = pa.py_buffer(get_bitmap(isnan))
@@ -26,35 +27,43 @@ objects (left-hand-side column).
     return pa.Array.from_buffers(pa.from_numpy_dtype(arr.dtype),
                                  arr.size,
                                  [None, pa.py_buffer(arr)])
-">GENBITMAP, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L46 title="def xnd_xnd(arr):
+">GENBITMAP, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L47 title="def xnd_xnd(arr, nan_to_null=False):
     import numpy as np
     import xnd
     xd = xnd.xnd.from_buffer(arr)
-    if issubclass(arr.dtype.type, (np.floating, np.complexfloating)):
+    if nan_to_null and issubclass(arr.dtype.type,
+                                  (np.floating, np.complexfloating)):
         isnan = np.isnan(arr)
         if isnan.any():
             raise NotImplementedError('xnd view of numpy ndarray with nans')
     return xd
 ">OPTIMAL, PARTIAL</a></td></tr>
-<tr><th>pandas.Series</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L12 title="def numpy_ndarray(pd_ser):
+<tr><th>pandas.Series</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L12 title="def numpy_ndarray(pd_ser, nan_to_null=False):
     return pd_ser.to_numpy()
-">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L18 title="def pyarrow_array(pd_ser):
+">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L18 title="def pyarrow_array(pd_ser, nan_to_null=False):
+    import numpy as np
     import pyarrow as pa
-    isnan = pd_ser.isna()
-    if isnan.any():
-        pa_nul = pa.py_buffer(get_bitmap(isnan.to_numpy()))
-        return pa.Array.from_buffers(pa.from_numpy_dtype(pd_ser.dtype),
-                                     pd_ser.size,
-                                     [pa_nul, pa.py_buffer(pd_ser.to_numpy())])
+    if nan_to_null and issubclass(pd_ser.dtype.type,
+                                  (np.floating, np.complexfloating)):
+        isnan = pd_ser.isna()
+        if isnan.any():
+            pa_nul = pa.py_buffer(get_bitmap(isnan.to_numpy()))
+            return pa.Array.from_buffers(pa.from_numpy_dtype(pd_ser.dtype),
+                                         pd_ser.size,
+                                         [pa_nul,
+                                          pa.py_buffer(pd_ser.to_numpy())])
     return pa.Array.from_buffers(pa.from_numpy_dtype(pd_ser.dtype),
                                  pd_ser.size,
                                  [None, pa.py_buffer(pd_ser.to_numpy())])
-">GENBITMAP, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L33 title="def xnd_xnd(pd_ser):
+">GENBITMAP, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L37 title="def xnd_xnd(pd_ser, nan_to_null=False):
+    import numpy as np
     import xnd
-    isnan = pd_ser.isna()
-    if not isnan.any():
-        return xnd.xnd.from_buffer(pd_ser.to_numpy())
-    raise NotImplementedError('xnd view of pandas.Series with nans')
+    if nan_to_null and issubclass(pd_ser.dtype.type,
+                                  (np.floating, np.complexfloating)):
+        isnan = pd_ser.isna()
+        if isnan.any():
+            raise NotImplementedError('xnd view of pandas.Series with nans')
+    return xnd.xnd.from_buffer(pd_ser.to_numpy())
 ">OPTIMAL, PARTIAL</a></td></tr>
 <tr><th>pyarrow.Array</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L11 title="def numpy_ndarray(pa_arr):
     if pa_arr.null_count == 0:
@@ -117,19 +126,17 @@ objects (left-hand-side column).
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td>1.0(1.0)</td><td>769.85(581.22)</td><td>188.12(55504.02)</td><td>111.09(N/A)</td></tr>
-<tr><th>pandas.Series</th><td>36.91(36.94)</td><td>0.99(1.02)</td><td>2720.76(58001.58)</td><td>2574.45(N/A)</td></tr>
-<tr><th>pyarrow.Array</th><td>18.01(N/A)</td><td>598.2(N/A)</td><td>0.99(1.0)</td><td>39.02(N/A)</td></tr>
-<tr><th>xnd.xnd</th><td>15.18(N/A)</td><td>1133.58(N/A)</td><td>57.77(N/A)</td><td>0.95(0.96)</td></tr>
+<tr><th>numpy.ndarray</th><td>1.01(1.02)</td><td>566.64(549.05)</td><td>38.01(33.38)</td><td>18.13(17.46)</td></tr>
+<tr><th>pandas.Series</th><td>40.35(40.04)</td><td>0.98(1.12)</td><td>98.32(98.07)</td><td>63.33(62.77)</td></tr>
+<tr><th>pyarrow.Array</th><td>17.79(17.19)</td><td>563.38(580.48)</td><td>0.98(0.98)</td><td>42.51(40.9)</td></tr>
+<tr><th>xnd.xnd</th><td>16.72(N/A)</td><td>1201.51(N/A)</td><td>56.94(N/A)</td><td>1.0(1.15)</td></tr>
 </table>
 <!--END arrayviews-measure_kernel TABLE-->
 
 #### Comments
 
 1. The numbers in the table are `<elapsed time to create a view of an obj>/<elapsed time to call 'def dummy(obj): return obj'>`.
-2. Results in the parenthesis correspond to objects with nulls.
-3. Test arrays are 64-bit float arrays with size 10000.
-4. The benchmark results for `GENBITMAP` cases depend on the test array sizes.
+2. Results in the parenthesis correspond to objects with nulls or nans. No attempts are made to convert nans to nulls. 
 
 ## Matrix of supported array views - CUDA device memory
 

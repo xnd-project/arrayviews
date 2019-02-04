@@ -42,7 +42,7 @@ def test_pyarrow_array():
 @pyarrowtest
 def test_pyarrow_array_with_null():
     arr = np.array([1, 2, np.nan, 4, 5])
-    pa_arr = numpy_ndarray_as.pyarrow_array(arr)
+    pa_arr = numpy_ndarray_as.pyarrow_array(arr, nan_to_null=True)
     expected_pa_arr = pa.array([1, 2, None, 4, 5], type=pa.float64())
     assert pa_arr.to_pylist() == expected_pa_arr.to_pylist()
 
@@ -50,7 +50,7 @@ def test_pyarrow_array_with_null():
     assert pa_arr[1] == 999
 
     arr = np.array([1, 2, np.nan, 4, 5]*5)
-    pa_arr = numpy_ndarray_as.pyarrow_array(arr)
+    pa_arr = numpy_ndarray_as.pyarrow_array(arr, nan_to_null=True)
     expected_pa_arr = pa.array([1, 2, None, 4, 5]*5, type=pa.float64())
     assert pa_arr.to_pylist() == expected_pa_arr.to_pylist()
 
@@ -94,7 +94,7 @@ def test_xnd_with_null():
     arr = np.array([1, 2, np.nan, 4, 5])
     with pytest.raises(NotImplementedError,
                        match="xnd view of numpy ndarray with nans"):
-        xnd_arr = numpy_ndarray_as.xnd_xnd(arr)
+        xnd_arr = numpy_ndarray_as.xnd_xnd(arr, nan_to_null=True)
         expected_xnd_arr = xnd.xnd([1, 2, None, 4, 5], type='5 * ?float64')
         assert xnd_arr.type == expected_xnd_arr.type
         assert xnd_arr.value == expected_xnd_arr.value

@@ -63,7 +63,7 @@ def test_pyarrow_array():
 def test_pyarrow_array_with_null():
     pd_ser = pd.Series([1, 2, None, 4, 5])
     expected_pa_arr = pa.array([1, 2, None, 4, 5], type=pa.float64())
-    pa_arr = pandas_series_as.pyarrow_array(pd_ser)
+    pa_arr = pandas_series_as.pyarrow_array(pd_ser, nan_to_null=True)
     assert pa_arr.null_count == expected_pa_arr.null_count
     assert pa_arr.to_pylist() == expected_pa_arr.to_pylist()
 
@@ -72,7 +72,7 @@ def test_pyarrow_array_with_null():
 
     pd_ser = pd.Series([1, 2, None, 4, 5]*5)
     expected_pa_arr = pa.array([1, 2, None, 4, 5]*5, type=pa.float64())
-    pa_arr = pandas_series_as.pyarrow_array(pd_ser)
+    pa_arr = pandas_series_as.pyarrow_array(pd_ser, nan_to_null=True)
     assert pa_arr.null_count == expected_pa_arr.null_count
     assert pa_arr.to_pylist() == expected_pa_arr.to_pylist()
 
@@ -91,11 +91,11 @@ def test_xnd_xnd():
 
 @xndtest
 def test_xnd_xnd_with_null():
-    pd_ser = pd.Series([1, 2, None, 4, 5])
+    pd_ser = pd.Series([1, 2, None, 4, 5], dtype=np.float64)
     with pytest.raises(NotImplementedError,
                        match="xnd view of pandas.Series with nans"):
-        xnd_arr = pandas_series_as.xnd_xnd(pd_ser)
-        expected_xnd_arr = xnd.xnd([1, 2, None, 4, 5])
+        xnd_arr = pandas_series_as.xnd_xnd(pd_ser, nan_to_null=True)
+        expected_xnd_arr = xnd.xnd([1, 2, None, 4, 5], dtype='?float64')
         assert xnd_arr.type == expected_xnd_arr.type
         assert xnd_arr.value == expected_xnd_arr.value
 

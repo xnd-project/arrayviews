@@ -14,7 +14,7 @@ def random(size, nulls=False):
     return r
 
 
-def pyarrow_array(arr):
+def pyarrow_array(arr, nan_to_null=False):
     """Return pyarrow.Array view of a numpy ndarray.
 
     In floating arrays, all nan values are interpreted as nulls.
@@ -24,7 +24,8 @@ def pyarrow_array(arr):
     """
     import numpy as np
     import pyarrow as pa
-    if issubclass(arr.dtype.type, (np.floating, np.complexfloating)):
+    if nan_to_null and issubclass(arr.dtype.type,
+                                  (np.floating, np.complexfloating)):
         isnan = np.isnan(arr)
         if isnan.any():
             pa_nul = pa.py_buffer(get_bitmap(isnan))
@@ -36,20 +37,21 @@ def pyarrow_array(arr):
                                  [None, pa.py_buffer(arr)])
 
 
-def pandas_series(arr):
+def pandas_series(arr, nan_to_null=False):
     """Return pandas.Series view of a numpy ndarray.
     """
     import pandas as pd
     return pd.Series(arr, copy=False)
 
 
-def xnd_xnd(arr):
+def xnd_xnd(arr, nan_to_null=False):
     """Return xnd.xnd view of a numpy ndarray.
     """
     import numpy as np
     import xnd
     xd = xnd.xnd.from_buffer(arr)
-    if issubclass(arr.dtype.type, (np.floating, np.complexfloating)):
+    if nan_to_null and issubclass(arr.dtype.type,
+                                  (np.floating, np.complexfloating)):
         isnan = np.isnan(arr)
         if isnan.any():
             raise NotImplementedError('xnd view of numpy ndarray with nans')
