@@ -102,7 +102,7 @@ objects (left-hand-side column).
 </table>
 <!--END arrayviews-support_kernel TABLE-->
 
-### Comments
+#### Comments
 
 1. In `numpy.ndarray` and `pandas.Series`, the `numpy.nan` value is interpreted as null value.
 2. `OPTIMAL` means that view creation does not require processing of array data
@@ -111,23 +111,25 @@ objects (left-hand-side column).
 5. `PARTIAL` means that view creation does not support the inputs with null values.
 6. For the implementation of view constructions, hover over table cell or click on the links to `arrayviews` package source code.
 
-## Efficiency of creating array views
+### Benchmark: creating array views
 
 <!--START arrayviews-measure_kernel TABLE-->
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td>1.0(1.0)</td><td>539.03(516.29)</td><td>80.96(674.91)</td><td>51.68(N/A)</td></tr>
-<tr><th>pandas.Series</th><td>35.98(35.54)</td><td>1.0(1.19)</td><td>1651.97(2700.77)</td><td>871.18(N/A)</td></tr>
-<tr><th>pyarrow.Array</th><td>16.95(N/A)</td><td>550.19(N/A)</td><td>0.97(0.97)</td><td>37.33(N/A)</td></tr>
-<tr><th>xnd.xnd</th><td>15.36(N/A)</td><td>1149.4(N/A)</td><td>58.53(N/A)</td><td>0.99(1.0)</td></tr>
+<tr><th>numpy.ndarray</th><td>1.0(1.0)</td><td>769.85(581.22)</td><td>188.12(55504.02)</td><td>111.09(N/A)</td></tr>
+<tr><th>pandas.Series</th><td>36.91(36.94)</td><td>0.99(1.02)</td><td>2720.76(58001.58)</td><td>2574.45(N/A)</td></tr>
+<tr><th>pyarrow.Array</th><td>18.01(N/A)</td><td>598.2(N/A)</td><td>0.99(1.0)</td><td>39.02(N/A)</td></tr>
+<tr><th>xnd.xnd</th><td>15.18(N/A)</td><td>1133.58(N/A)</td><td>57.77(N/A)</td><td>0.95(0.96)</td></tr>
 </table>
 <!--END arrayviews-measure_kernel TABLE-->
 
-### Comments
+#### Comments
 
 1. The numbers in the table are `<elapsed time to create a view of an obj>/<elapsed time to call 'def dummy(obj): return obj'>`.
 2. Results in the parenthesis correspond to objects with nulls.
+3. Test arrays are 64-bit float arrays with size 10000.
+4. The benchmark results for `GENBITMAP` cases depend on the test array sizes.
 
 ## Matrix of supported array views - CUDA device memory
 

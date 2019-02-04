@@ -98,8 +98,8 @@ def measure_kernel(source_module, target_name):
     if random is None:
         return 'random NOT IMPL'
 
-    number = 100000
-    size = 100
+    number = 10000
+    size = 10000
     src1 = random(size)
     src2 = random(size, nulls=True)
     import timeit
