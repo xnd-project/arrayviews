@@ -38,9 +38,9 @@ objects (left-hand-side column).
             raise NotImplementedError('xnd view of numpy ndarray with nans')
     return xd
 ">OPTIMAL, PARTIAL</a></td></tr>
-<tr><th>pandas.Series</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L12 title="def numpy_ndarray(pd_ser, nan_to_null=False):
+<tr><th>pandas.Series</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L13 title="def numpy_ndarray(pd_ser, nan_to_null=False):
     return pd_ser.to_numpy()
-">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L18 title="def pyarrow_array(pd_ser, nan_to_null=False):
+">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L19 title="def pyarrow_array(pd_ser, nan_to_null=False):
     import numpy as np
     import pyarrow as pa
     if nan_to_null and issubclass(pd_ser.dtype.type,
@@ -55,7 +55,7 @@ objects (left-hand-side column).
     return pa.Array.from_buffers(pa.from_numpy_dtype(pd_ser.dtype),
                                  pd_ser.size,
                                  [None, pa.py_buffer(pd_ser.to_numpy())])
-">GENBITMAP, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L37 title="def xnd_xnd(pd_ser, nan_to_null=False):
+">GENBITMAP, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L38 title="def xnd_xnd(pd_ser, nan_to_null=False):
     import numpy as np
     import xnd
     if nan_to_null and issubclass(pd_ser.dtype.type,
@@ -115,7 +115,7 @@ objects (left-hand-side column).
 
 1. In `numpy.ndarray` and `pandas.Series`, the `numpy.nan` value is interpreted as null value.
 2. `OPTIMAL` means that view creation does not require processing of array data
-3. `GENBITMAP` means that view creation does requires processing of array data in the presence of null values.
+3. `GENBITMAP` means that view creation does requires processing of array data in the presence of null or nan values. By default, such processing is disabled.
 4. `FULL` means that view creation supports the inputs with null values.
 5. `PARTIAL` means that view creation does not support the inputs with null values.
 6. For the implementation of view constructions, hover over table cell or click on the links to `arrayviews` package source code.
@@ -126,10 +126,10 @@ objects (left-hand-side column).
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td>1.0(1.0)</td><td>548.3(517.08)</td><td>39.13(35.22)</td><td>16.28(16.33)</td></tr>
-<tr><th>pandas.Series</th><td>44.77(42.67)</td><td>1.02(0.93)</td><td>105.9(113.67)</td><td>64.42(61.43)</td></tr>
-<tr><th>pyarrow.Array</th><td>18.52(N/A)</td><td>593.04(N/A)</td><td>1.0(1.09)</td><td>37.13(N/A)</td></tr>
-<tr><th>xnd.xnd</th><td>16.16(N/A)</td><td>1092.35(N/A)</td><td>62.04(N/A)</td><td>0.99(0.98)</td></tr>
+<tr><th>numpy.ndarray</th><td>0.99(1.0)</td><td>577.15(551.05)</td><td>35.95(32.05)</td><td>15.97(15.52)</td></tr>
+<tr><th>pandas.Series</th><td>38.63(38.51)</td><td>1.01(0.92)</td><td>100.86(98.74)</td><td>57.67(57.56)</td></tr>
+<tr><th>pyarrow.Array</th><td>17.02(N/A)</td><td>648.22(N/A)</td><td>0.99(0.98)</td><td>36.59(N/A)</td></tr>
+<tr><th>xnd.xnd</th><td>15.85(N/A)</td><td>1162.02(N/A)</td><td>58.78(N/A)</td><td>0.97(0.99)</td></tr>
 </table>
 <!--END arrayviews-measure_kernel TABLE-->
 

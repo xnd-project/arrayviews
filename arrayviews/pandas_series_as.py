@@ -6,7 +6,8 @@ def random(size, nulls=False):
     """Return random pandas.Series instance of 64 bit floats.
     """
     return numpy_ndarray_as.pandas_series(
-        numpy_ndarray_as.random(size, nulls=nulls))
+        numpy_ndarray_as.random(size, nulls=nulls),
+        nan_to_null=True)
 
 
 def numpy_ndarray(pd_ser, nan_to_null=False):

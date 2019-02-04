@@ -84,8 +84,11 @@ def support_kernel(source_module, target_name):
 
 
 def measure_kernel(source_module, target_name):
+    import timeit
+
     def dummy_func(obj):
         return obj
+
     source_name = source_module.__name__.split('.')[-1][:-3]
     if target_name == source_name:
         target_func = dummy_func
@@ -102,7 +105,6 @@ def measure_kernel(source_module, target_name):
     size = 10000
     src1 = random(size)
     src2 = random(size, nulls=True)
-    import timeit
     r1 = timeit.timeit('target_func(obj)', number=number,
                        globals=dict(target_func=target_func, obj=src1))
     try:
@@ -112,7 +114,6 @@ def measure_kernel(source_module, target_name):
         r2 = None
     r0 = timeit.timeit('target_func(obj)', number=number,
                        globals=dict(target_func=dummy_func, obj=src1))
-    print(source_name, target_name, r1, r2, r0)
     if r2 is None:
         return f'{round(r1/r0, 2)}(N/A)'
     return f'{round(r1/r0, 2)}({round(r2/r0, 2)})'
