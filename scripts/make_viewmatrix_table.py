@@ -19,6 +19,14 @@ def get_result(source):
     return ', '.join(tags)
 
 
+target_name_title = dict(
+    numpy_ndarray='numpy.ndarray',
+    pandas_series='pandas.Series',
+    pyarrow_array='pyarrow.Array',
+    xnd_xnd='xnd.xnd',
+)
+
+
 def make_viewmatrix_table(package):
 
     target_names = []
@@ -31,18 +39,19 @@ def make_viewmatrix_table(package):
     lines = []
     lines.append(f'<!--START {package.__name__} TABLE-->')
     lines.append('<table style="width:100%">')
-    lines.append(f'<tr><th>Views</th><th colspan="{len(target_names)}">'
+    lines.append('<tr><th rowspan=2>Views</th>'
+                 f'<th colspan="{len(target_names)}">'
                  'Objects</th></tr>')
     row = []
-    row.append(f'<tr><th></th>')
+    row.append(f'<tr>')
     for source_name in target_names:
-        row.append(f'<th>{source_name}</th>')
+        row.append(f'<th>{target_name_title[source_name]}</th>')
     row.append('</tr>')
     lines.append(''.join(row))
 
     for target_name in target_names:
         row = []
-        row.append(f'<tr><th>{target_name}</th>')
+        row.append(f'<tr><th>{target_name_title[target_name]}</th>')
         for source_name in target_names:
             source_module = getattr(package, target_name + '_as', None)
             module_path = '/'.join(source_module.__name__.split('.'))

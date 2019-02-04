@@ -3,16 +3,14 @@
 ## Matrix of supported array views - host memory
 
 The following table summarizes the support of creating a specific array
-view (left-hand-side column) of given array storage
-object (top-row). The table cells contains two answers
-corresponding to if the view can be created from an array object without or with nulls, respectively.
-In the case of `numpy.ndarray`, the `nan` values are interpreted as nulls.
+view (left-hand-side column) for the given array storage
+objects (top-row). 
 
 <!--START arrayviews TABLE-->
 <table style="width:100%">
-<tr><th>Views</th><th colspan="4">Objects</th></tr>
-<tr><th></th><th>numpy_ndarray</th><th>pandas_series</th><th>pyarrow_array</th><th>xnd_xnd</th></tr>
-<tr><th>numpy_ndarray</th><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L28 title="def pandas_series(arr):
+<tr><th rowspan=2>Views</th><th colspan="4">Objects</th></tr>
+<tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
+<tr><th>numpy.ndarray</th><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L28 title="def pandas_series(arr):
     import pandas as pd
     return pd.Series(arr, copy=False)
 ">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/numpy_ndarray_as.py#L6 title="def pyarrow_array(arr):
@@ -38,7 +36,7 @@ In the case of `numpy.ndarray`, the `nan` values are interpreted as nulls.
             raise NotImplementedError('xnd view of numpy ndarray with nans')
     return xd
 ">OPTIMAL, PARTIAL</a></td></tr>
-<tr><th>pandas_series</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L4 title="def numpy_ndarray(pd_ser):
+<tr><th>pandas.Series</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L4 title="def numpy_ndarray(pd_ser):
     return pd_ser.to_numpy()
 ">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pandas_series_as.py#L10 title="def pyarrow_array(pd_ser):
     import pyarrow as pa
@@ -58,7 +56,7 @@ In the case of `numpy.ndarray`, the `nan` values are interpreted as nulls.
         return xnd.xnd.from_buffer(pd_ser.to_numpy())
     raise NotImplementedError('xnd view of pandas.Series with nans')
 ">OPTIMAL, PARTIAL</a></td></tr>
-<tr><th>pyarrow_array</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L2 title="def numpy_ndarray(pa_arr):
+<tr><th>pyarrow.Array</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/pyarrow_array_as.py#L2 title="def numpy_ndarray(pa_arr):
     if pa_arr.null_count == 0:
         return pa_arr.to_numpy()
     pa_nul, pa_buf = pa_arr.buffers()
@@ -76,7 +74,7 @@ In the case of `numpy.ndarray`, the `nan` values are interpreted as nulls.
     pa_nul, pa_buf = pa_arr.buffers()
     raise NotImplementedError('xnd view of pyarrow.Array with nulls')
 ">OPTIMAL, PARTIAL</a></td></tr>
-<tr><th>xnd_xnd</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/xnd_xnd_as.py#L1 title="def numpy_ndarray(xd_arr):
+<tr><th>xnd.xnd</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/xnd_xnd_as.py#L1 title="def numpy_ndarray(xd_arr):
     import numpy as np
     if not xd_arr.dtype.isoptional():
         return np.array(xd_arr, copy=False)
@@ -104,8 +102,14 @@ In the case of `numpy.ndarray`, the `nan` values are interpreted as nulls.
 </table>
 <!--END arrayviews TABLE-->
 
+### Notes
 
-For the implementation of view constructions, see `arrayviews` package source code.
+1. In `numpy.ndarray` and `pandas.Series`, the `numpy.nan` value is interpreted as null value.
+2. `OPTIMAL` means that view creation does not require processing of array data
+3. `GENBITMAP` means that view creation does requires processing of array data in the presence of null values.
+4. `FULL` means that view creation supports the inputs with null values.
+5. `PARTIAL` means that view creation does not support the inputs with null values.
+6. For the implementation of view constructions, hover over table cell or click on the links to `arrayviews` package source code.
 
 ## Matrix of supported array views - CUDA device memory
 
