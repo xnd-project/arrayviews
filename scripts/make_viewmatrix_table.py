@@ -24,8 +24,10 @@ target_name_title = dict(
     pandas_series='pandas.Series',
     pyarrow_array='pyarrow.Array',
     xnd_xnd='xnd.xnd',
-    pyarrow_cuda_buffer='pyarrow.cuda.CudaBuffer',
+    pyarrow_cuda_buffer='pyarrow CudaBuffer',
     numba_cuda_DeviceNDArray='numba DeviceNDArray',
+    cupy_ndarray='cupy.ndarray',
+    cupy_cuda_MemoryPointer='cupy MemoryPointer'
 )
 
 
@@ -103,8 +105,8 @@ def measure_kernel(source_module, target_name):
     if random is None:
         return 'random NOT IMPL'
 
-    number = 100000
-    size = 10000
+    number, size = 100000, 51200
+    #number, size = 100, 512
     src1 = random(size)
     r1 = timeit.timeit('target_func(obj)', 'target_func(obj)',
                        number=number,

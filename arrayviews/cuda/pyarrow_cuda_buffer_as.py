@@ -30,3 +30,20 @@ def numba_cuda_DeviceNDArray(cbuf):
     dtype = np.dtype('uint8')
     return DeviceNDArray((cbuf.size,), (dtype.itemsize,), dtype,
                          gpu_data=cbuf.to_numba())
+
+
+def cupy_cuda_MemoryPointer(cbuf):
+    """Return cupy.cuda.MemoryPointer view of a pyarrow.cuda.CudaBuffer.
+    """
+    import cupy
+    addr = cbuf.context.get_device_address(cbuf.address)
+    mem = cupy.cuda.UnownedMemory(addr, cbuf.size, cbuf)
+    return cupy.cuda.MemoryPointer(mem, 0)
+
+
+def cupy_ndarray(cbuf):
+    """Return cupy.ndarray view of a pyarrow.cuda.CudaBuffer.
+    """
+    import cupy
+    return cupy.ndarray(cbuf.size, dtype=cupy.uint8,
+                        memptr=cupy_cuda_MemoryPointer(cbuf))
