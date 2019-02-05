@@ -1,4 +1,5 @@
 
+
 def random(size):
     import numpy as np
     import pyarrow as pa
@@ -47,3 +48,14 @@ def cupy_ndarray(cbuf):
     import cupy
     return cupy.ndarray(cbuf.size, dtype=cupy.uint8,
                         memptr=cupy_cuda_MemoryPointer(cbuf))
+
+
+def xnd_xnd_cuda(cbuf):
+    """Return xnd.xnd view of a pyarrow.cuda.CudaBuffer [EXPERIMENTAL].
+    """
+    import xnd
+    import pyarrow as pa
+    addr = cbuf.context.get_device_address(cbuf.address)
+    # device = cbuf.context.device_number
+    buf = pa.foreign_buffer(addr, cbuf.size, cbuf)
+    return xnd.xnd.from_buffer(buf)

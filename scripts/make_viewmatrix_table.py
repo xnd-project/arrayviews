@@ -10,6 +10,8 @@ def get_result(source):
     tags = []
     if 'get_bitmap' in source:
         tags.append('GENBITMAP')
+    elif 'DERIVED' in source:
+        tags.append('DERIVED')
     else:
         tags.append('OPTIMAL')
     if 'NotImplemented' in source:
@@ -27,7 +29,8 @@ target_name_title = dict(
     pyarrow_cuda_buffer='pyarrow CudaBuffer',
     numba_cuda_DeviceNDArray='numba DeviceNDArray',
     cupy_ndarray='cupy.ndarray',
-    cupy_cuda_MemoryPointer='cupy MemoryPointer'
+    cupy_cuda_MemoryPointer='cupy MemoryPointer',
+    xnd_xnd_cuda='xnd.xnd CUDA',
 )
 
 
@@ -106,7 +109,7 @@ def measure_kernel(source_module, target_name):
         return 'random NOT IMPL'
 
     number, size = 100000, 51200
-    #number, size = 100, 512
+    # number, size = 100, 512
     src1 = random(size)
     r1 = timeit.timeit('target_func(obj)', 'target_func(obj)',
                        number=number,

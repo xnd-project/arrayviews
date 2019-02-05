@@ -1,3 +1,5 @@
+from . import pyarrow_cuda_buffer_as
+
 
 def random(size):
     import numba.cuda as cuda
@@ -38,3 +40,11 @@ def cupy_ndarray(nb_arr):
     return cupy.ndarray(nb_arr.shape, dtype=cupy.uint8,
                         strides=nb_arr.strides,
                         memptr=cupy_cuda_MemoryPointer(nb_arr))
+
+
+def xnd_xnd_cuda(nb_arr):
+    """Return xnd.xnd view of a numba DeviceNDArray.
+    """
+    cbuf = pyarrow_cuda_buffer(nb_arr)
+    # DERIVED
+    return pyarrow_cuda_buffer_as.xnd_xnd_cuda(cbuf)
