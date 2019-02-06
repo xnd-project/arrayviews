@@ -37,7 +37,8 @@ def cupy_cuda_MemoryPointer(cbuf):
     """Return cupy.cuda.MemoryPointer view of a pyarrow.cuda.CudaBuffer.
     """
     import cupy
-    addr = cbuf.context.get_device_address(cbuf.address)
+    #addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
+    addr = cbuf.address
     mem = cupy.cuda.UnownedMemory(addr, cbuf.size, cbuf)
     return cupy.cuda.MemoryPointer(mem, 0)
 
@@ -55,7 +56,8 @@ def xnd_xnd_cuda(cbuf):
     """
     import xnd
     import pyarrow as pa
-    addr = cbuf.context.get_device_address(cbuf.address)
+    #addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
+    addr = cbuf.address
     # device = cbuf.context.device_number
     buf = pa.foreign_buffer(addr, cbuf.size, cbuf)
     return xnd.xnd.from_buffer(buf)

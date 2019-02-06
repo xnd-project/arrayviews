@@ -40,9 +40,11 @@ host or device memory. The following packages are supported:
 |---------|-----------------|-----------------|------------------------|
 | numpy   | 1.16.1          | ndarray         | N/A                    |
 | pandas  | 0.24.1          | Series          | N/A                    |
-| pyarrow | 0.12.1.dev120+g7f9... | Array     | cuda.CudaBuffer        |
+| pyarrow | 0.12.1.dev120+g7f9... | Array     | CudaBuffer             |
 | xnd     | 0.2.0dev3       | xnd             | xnd                    |
+| numba   | 0.41.0          | N/A             | DeviceNDArray          |
 | cupy    | 5.2.0           | N/A             | ndarray, cuda.MemoryPointer |
+| cudf    | 0.6-branch      | N/A             | Series                 |
 
 ## Basic usage
 
@@ -62,7 +64,8 @@ from arrayviews.cuda import (
   cupy_ndarray_as,
   numba_cuda_DeviceNDArray,
   pyarrow_cuda_buffer_as,
-  xnd_xnd_cuda_as
+  xnd_xnd_cuda_as,
+  cudf_Series_as,
   )
 ...
 ```
@@ -226,10 +229,10 @@ array view (top-row) for the given array storage objects
 <table style="width:100%">
 <tr><th rowspan=2>Objects</th><th colspan="4">Views</th></tr>
 <tr><th>numpy.ndarray</th><th>pandas.Series</th><th>pyarrow.Array</th><th>xnd.xnd</th></tr>
-<tr><th>numpy.ndarray</th><td>1.02(0.98)</td><td>322.66(323.84)</td><td>31.92(31.54)</td><td>15.6(15.4)</td></tr>
-<tr><th>pandas.Series</th><td>30.21(30.21)</td><td>0.98(0.98)</td><td>79.62(78.66)</td><td>47.42(47.95)</td></tr>
-<tr><th>pyarrow.Array</th><td>16.97(N/A)</td><td>356.83(N/A)</td><td>0.99(0.99)</td><td>26.26(N/A)</td></tr>
-<tr><th>xnd.xnd</th><td>14.22(N/A)</td><td>345.06(N/A)</td><td>52.4(N/A)</td><td>0.96(0.95)</td></tr>
+<tr><th>numpy.ndarray</th><td>0.99(0.98)</td><td>304.57(304.49)</td><td>54.38(54.58)</td><td>14.97(14.93)</td></tr>
+<tr><th>pandas.Series</th><td>29.86(29.68)</td><td>1.01(1.0)</td><td>110.25(110.86)</td><td>48.47(48.37)</td></tr>
+<tr><th>pyarrow.Array</th><td>17.61(N/A)</td><td>350.51(N/A)</td><td>1.0(1.0)</td><td>25.71(N/A)</td></tr>
+<tr><th>xnd.xnd</th><td>14.22(N/A)</td><td>331.47(N/A)</td><td>80.88(N/A)</td><td>1.0(1.0)</td></tr>
 </table>
 <!--END arrayviews-measure_kernel TABLE-->
 
@@ -243,51 +246,64 @@ array view (top-row) for the given array storage objects
 
 <!--START arrayviews.cuda-support_kernel TABLE-->
 <table style="width:100%">
-<tr><th rowspan=2>Objects</th><th colspan="5">Views</th></tr>
-<tr><th>pyarrow CudaBuffer</th><th>numba DeviceNDArray</th><th>cupy.ndarray</th><th>cupy MemoryPointer</th><th>xnd.xnd CUDA</th></tr>
+<tr><th rowspan=2>Objects</th><th colspan="6">Views</th></tr>
+<tr><th>pyarrow CudaBuffer</th><th>numba DeviceNDArray</th><th>cupy.ndarray</th><th>cupy MemoryPointer</th><th>xnd.xnd CUDA</th><th>cudf Series</th></tr>
 <tr><th>pyarrow CudaBuffer</th><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/pyarrow_cuda_buffer_as.py#L26 title="def numba_cuda_DeviceNDArray(cbuf):
     import numpy as np
     from numba.cuda.cudadrv.devicearray import DeviceNDArray
     dtype = np.dtype('uint8')
     return DeviceNDArray((cbuf.size,), (dtype.itemsize,), dtype,
                          gpu_data=cbuf.to_numba())
-">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/pyarrow_cuda_buffer_as.py#L45 title="def cupy_ndarray(cbuf):
+">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/pyarrow_cuda_buffer_as.py#L46 title="def cupy_ndarray(cbuf):
     import cupy
     return cupy.ndarray(cbuf.size, dtype=cupy.uint8,
                         memptr=cupy_cuda_MemoryPointer(cbuf))
 ">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/pyarrow_cuda_buffer_as.py#L36 title="def cupy_cuda_MemoryPointer(cbuf):
     import cupy
-    addr = cbuf.context.get_device_address(cbuf.address)
+    #addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
+    addr = cbuf.address
     mem = cupy.cuda.UnownedMemory(addr, cbuf.size, cbuf)
     return cupy.cuda.MemoryPointer(mem, 0)
-">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/pyarrow_cuda_buffer_as.py#L53 title="def xnd_xnd_cuda(cbuf):
+">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/pyarrow_cuda_buffer_as.py#L54 title="def xnd_xnd_cuda(cbuf):
     import xnd
     import pyarrow as pa
-    addr = cbuf.context.get_device_address(cbuf.address)
+    #addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
+    addr = cbuf.address
     # device = cbuf.context.device_number
     buf = pa.foreign_buffer(addr, cbuf.size, cbuf)
     return xnd.xnd.from_buffer(buf)
-">OPTIMAL, FULL</a></td></tr>
+">OPTIMAL, FULL</a></td><td>NOT IMPL</td></tr>
 <tr><th>numba DeviceNDArray</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L18 title="def pyarrow_cuda_buffer(nb_arr):
     import pyarrow.cuda as cuda
     ctx = cuda.Context()
-    return ctx.buffer_from_object(nb_arr)
-">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L36 title="def cupy_ndarray(nb_arr):
+    if hasattr(ctx, 'buffer_from_object'):
+        # buffer_from_object is defined in arrow>=0.12.1
+        return ctx.buffer_from_object(nb_arr)
+    desc = nb_arr.__cuda_array_interface__
+    addr = desc['data'][0]
+    size = nb_arr.alloc_size
+    strides = desc.get('strides')
+    assert strides in [(1, ), None], repr(strides)
+    return ctx.foreign_buffer(addr, size)
+">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L43 title="def cupy_ndarray(nb_arr):
     import cupy
     return cupy.ndarray(nb_arr.shape, dtype=cupy.uint8,
                         strides=nb_arr.strides,
                         memptr=cupy_cuda_MemoryPointer(nb_arr))
-">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L26 title="def cupy_cuda_MemoryPointer(nb_arr):
+">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L33 title="def cupy_cuda_MemoryPointer(nb_arr):
     import cupy
     addr = nb_arr.device_ctypes_pointer.value
     size = nb_arr.alloc_size
     mem = cupy.cuda.UnownedMemory(addr, size, nb_arr)
     return cupy.cuda.MemoryPointer(mem, 0)
-">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L45 title="def xnd_xnd_cuda(nb_arr):
+">OPTIMAL, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L52 title="def xnd_xnd_cuda(nb_arr):
     cbuf = pyarrow_cuda_buffer(nb_arr)
     # DERIVED
     return pyarrow_cuda_buffer_as.xnd_xnd_cuda(cbuf)
-">DERIVED, FULL</a></td></tr>
+">DERIVED, FULL</a></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/numba_cuda_DeviceNDArray_as.py#L60 title="def cudf_Series(nb_arr):
+    import cudf
+    return cudf.Series(nb_arr)
+">OPTIMAL, FULL</a></td></tr>
 <tr><th>cupy.ndarray</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/cupy_ndarray_as.py#L22 title="def pyarrow_cuda_buffer(cp_arr):
     import pyarrow.cuda as cuda
     ctx = cuda.Context(cp_arr.data.device.id)
@@ -297,8 +313,8 @@ array view (top-row) for the given array storage objects
     return nb_cuda.as_cuda_array(cp_arr)
 ">OPTIMAL, FULL</a></td><td></td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/cupy_ndarray_as.py#L30 title="def cupy_cuda_MemoryPointer(cp_arr):
     return cp_arr.data
-">OPTIMAL, FULL</a></td><td>NOT IMPL</td></tr>
-<tr><th>cupy MemoryPointer</th><td>NOT IMPL</td><td>NOT IMPL</td><td>NOT IMPL</td><td></td><td>NOT IMPL</td></tr>
+">OPTIMAL, FULL</a></td><td>NOT IMPL</td><td>NOT IMPL</td></tr>
+<tr><th>cupy MemoryPointer</th><td>NOT IMPL</td><td>NOT IMPL</td><td>NOT IMPL</td><td></td><td>NOT IMPL</td><td>NOT IMPL</td></tr>
 <tr><th>xnd.xnd CUDA</th><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/xnd_xnd_cuda_as.py#L18 title="def pyarrow_cuda_buffer(xd_arr):
     import pyarrow as pa
     import pyarrow.cuda as cuda
@@ -319,7 +335,11 @@ array view (top-row) for the given array storage objects
     buf = pa.py_buffer(memoryview(xd_arr))
     mem = cupy.cuda.UnownedMemory(buf.address, buf.size, xd_arr)
     return cupy.cuda.MemoryPointer(mem, 0)
-">OPTIMAL, FULL</a></td><td></td></tr>
+">OPTIMAL, FULL</a></td><td></td><td>NOT IMPL</td></tr>
+<tr><th>cudf Series</th><td>NOT IMPL</td><td><a href=https://github.com/plures/arrayviews/blob/master/arrayviews/cuda/cudf_Series_as.py#L13 title="def numba_cuda_DeviceNDArray(cf_ser):
+    return cf_ser.data.memf numba_cuda_DeviceNDArray(cf_ser):
+    return cf_ser.data.mem
+">OPTIMAL, FULL</a></td><td>NOT IMPL</td><td>NOT IMPL</td><td>NOT IMPL</td><td></td></tr>
 </table>
 <!--END arrayviews.cuda-support_kernel TABLE-->
 
@@ -327,13 +347,14 @@ array view (top-row) for the given array storage objects
 
 <!--START arrayviews.cuda-measure_kernel TABLE-->
 <table style="width:100%">
-<tr><th rowspan=2>Objects</th><th colspan="5">Views</th></tr>
-<tr><th>pyarrow CudaBuffer</th><th>numba DeviceNDArray</th><th>cupy.ndarray</th><th>cupy MemoryPointer</th><th>xnd.xnd CUDA</th></tr>
-<tr><th>pyarrow CudaBuffer</th><td>1.0</td><td>371.34</td><td>40.55</td><td>27.76</td><td>32.52</td></tr>
-<tr><th>numba DeviceNDArray</th><td>82.32</td><td>1.01</td><td>39.64</td><td>23.62</td><td>128.18</td></tr>
-<tr><th>cupy.ndarray</th><td>27.41</td><td>361.54</td><td>0.98</td><td>1.16</td><td>NOT IMPL</td></tr>
-<tr><th>cupy MemoryPointer</th><td>NOT IMPL</td><td>NOT IMPL</td><td>NOT IMPL</td><td>0.98</td><td>NOT IMPL</td></tr>
-<tr><th>xnd.xnd CUDA</th><td>33.79</td><td>428.29</td><td>41.05</td><td>26.1</td><td>1.01</td></tr>
+<tr><th rowspan=2>Objects</th><th colspan="6">Views</th></tr>
+<tr><th>pyarrow CudaBuffer</th><th>numba DeviceNDArray</th><th>cupy.ndarray</th><th>cupy MemoryPointer</th><th>xnd.xnd CUDA</th><th>cudf Series</th></tr>
+<tr><th>pyarrow CudaBuffer</th><td>0.99</td><td>381.57</td><td>25.89</td><td>14.32</td><td>22.34</td><td>NOT IMPL</td></tr>
+<tr><th>numba DeviceNDArray</th><td>53.68</td><td>0.99</td><td>37.55</td><td>22.68</td><td>92.66</td><td>154.96</td></tr>
+<tr><th>cupy.ndarray</th><td>34.96</td><td>356.44</td><td>1.0</td><td>1.17</td><td>NOT IMPL</td><td>NOT IMPL</td></tr>
+<tr><th>cupy MemoryPointer</th><td>NOT IMPL</td><td>NOT IMPL</td><td>NOT IMPL</td><td>1.0</td><td>NOT IMPL</td><td>NOT IMPL</td></tr>
+<tr><th>xnd.xnd CUDA</th><td>45.92</td><td>452.21</td><td>42.64</td><td>29.79</td><td>0.99</td><td>NOT IMPL</td></tr>
+<tr><th>cudf Series</th><td>NOT IMPL</td><td>3.39</td><td>NOT IMPL</td><td>NOT IMPL</td><td>NOT IMPL</td><td>0.99</td></tr>
 </table>
 <!--END arrayviews.cuda-measure_kernel TABLE-->
 

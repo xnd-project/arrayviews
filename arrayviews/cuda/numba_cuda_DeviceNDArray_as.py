@@ -20,8 +20,15 @@ def pyarrow_cuda_buffer(nb_arr):
     """
     import pyarrow.cuda as cuda
     ctx = cuda.Context()
-    return ctx.buffer_from_object(nb_arr)
-
+    if hasattr(ctx, 'buffer_from_object'):
+        # buffer_from_object is defined in arrow>=0.12.1
+        return ctx.buffer_from_object(nb_arr)
+    desc = nb_arr.__cuda_array_interface__
+    addr = desc['data'][0]
+    size = nb_arr.alloc_size
+    strides = desc.get('strides')
+    assert strides in [(1, ), None], repr(strides)
+    return ctx.foreign_buffer(addr, size)
 
 def cupy_cuda_MemoryPointer(nb_arr):
     """Return cupy.cuda.MemoryPointer view of a numba DeviceNDArray.
@@ -48,3 +55,10 @@ def xnd_xnd_cuda(nb_arr):
     cbuf = pyarrow_cuda_buffer(nb_arr)
     # DERIVED
     return pyarrow_cuda_buffer_as.xnd_xnd_cuda(cbuf)
+
+
+def cudf_Series(nb_arr):
+    """Return cudf.Series view of a numba DeviceNDArray.
+    """
+    import cudf
+    return cudf.Series(nb_arr)

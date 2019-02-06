@@ -3,6 +3,7 @@ import pytest
 from arrayviews.cuda import numba_cuda_DeviceNDArray_as
 from arrayviews.cuda import pyarrow_cuda_buffer_as
 from arrayviews.cuda import cupy_ndarray_as
+from arrayviews.cuda import cudf_Series_as
 
 np = pytest.importorskip("numpy")
 nb = pytest.importorskip("numba")
@@ -19,12 +20,20 @@ try:
 except ImportError:
     cupy = None
 
+try:
+    import cudf
+except ImportError:
+    cudf = None
+
 cupytest = pytest.mark.skipif(
     cupy is None,
     reason="requires the cupy package")
 pyarrowtest = pytest.mark.skipif(
     pa is None or pa_cuda is None,
     reason="requires the pyarrow and pyarrow.cuda packages")
+cudftest = pytest.mark.skipif(
+    cudf is None,
+    reason="requires the cudf package")
 
 
 @pyarrowtest
@@ -56,3 +65,13 @@ def test_cupy_ndarray():
     arr2 = numba_cuda_DeviceNDArray_as.numpy_ndarray(nb_arr)
     np.testing.assert_array_equal(arr1, arr2)
     assert arr1[1] == 99
+
+
+@cudftest
+def test_cudf_Series():
+    nb_arr = numba_cuda_DeviceNDArray_as.random(5)
+    cf_ser = numba_cuda_DeviceNDArray_as.cudf_Series(nb_arr)
+
+    arr1 = cudf_Series_as.numpy_ndarray(cf_ser)
+    arr2 = numba_cuda_DeviceNDArray_as.numpy_ndarray(nb_arr)
+    np.testing.assert_array_equal(arr1, arr2)

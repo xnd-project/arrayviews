@@ -31,6 +31,7 @@ target_name_title = dict(
     cupy_ndarray='cupy.ndarray',
     cupy_cuda_MemoryPointer='cupy MemoryPointer',
     xnd_xnd_cuda='xnd.xnd CUDA',
+    cudf_Series='cudf Series',
 )
 
 
