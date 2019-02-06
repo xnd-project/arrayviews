@@ -35,6 +35,7 @@ see it happen in future. Meanwhile...
 The aim of this project is to establish a connection between different
 data storage object implementations while avoiding copying the data in
 host or device memory. The following packages are supported:
+
 | Package | Tested versions | Storage on host | Storage on CUDA device |
 |---------|-----------------|-----------------|------------------------|
 | numpy   | 1.16.1          | ndarray         | N/A                    |
