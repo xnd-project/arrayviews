@@ -1,10 +1,98 @@
 # ArrayViews
 
-## Matrix of supported array views - host memory
+## Introduction
 
-The following table summarizes the support of creating a specific array
-view (top-row) for the given array storage
-objects (left-hand-side column). 
+There exists many array libraries that implement objects for storing
+data in allocated memory areas. Already in Python ecosystem, the
+number of such libraries is more than just few (see below), some of
+them are designed for referencing the memory of both host RAM and the
+memory of accelerator devices such as GPUs. Such Python packages
+implement various computational algorithms that one would wish to
+apply on the data stored in some other array object than what the
+algoritms use. 
+
+Many of the array object implementations support Python Buffer
+Protocol [PEP-3118](https://www.python.org/dev/peps/pep-3118/) that
+makes it possible to create array objects from other implementations
+of array objects without actually copying the memory - this is called
+*creating array views*.
+
+As a side note, unfortunately, the Python Buffer Protocol is
+incomplete when considering data storage in devices memory. The
+PEP-3118 lacks the device concept which makes it almost impossible to
+use existing array storage implementations to hold the memory pointers
+of such devices.  This has resulted in a emergence of a number of new
+array libraries specifically designed for holding pointers to device
+memory. However, the approach of reimplementing the array storage
+objects for each different device from scatch does not scale well as
+the only essential restriction is about the interpretation of a memory
+pointer - whether the pointer value can be dereferenced in a (host or
+device) process to use the data, or not. The rest of the array object
+implementation would remain the same.  Instead, the Python Buffer
+Protocol should be extended with the device concept. Hopefully we'll
+see it happen in future. Meanwhile...
+
+The aim of this project is to establish a connection between different
+data storage object implementations while avoiding copying the data in
+host or device memory.
+
+## Basic usage
+
+To use ``arrayviews`` package for host memory, import the needed data
+storage support modules, for instance,
+```
+from arrayviews import (
+  numpy_ndarray_as,
+  pandas_series_as,
+  pyarrow_array_as,
+  xnd_xnd_as
+  )
+```
+For CUDA based device memory, one can use the following import statement:
+```
+from arrayviews.cuda import (
+  cupy_ndarray_as,
+  numba_cuda_DeviceNDArray,
+  pyarrow_cuda_buffer_as,
+  xnd_xnd_cuda_as
+  )
+...
+```
+The general pattern of creating a specific view of another storage object is:
+```
+data_view = <data storage object>_as.<view data storage object>(data)
+```
+For example,
+```
+>>> import numpy as np
+>>> import pyarrow as pa
+>>> from arrayviews import numpy_ndarray_as
+>>> np_arr = np.arange(5)
+>>> pa_arr = numpy_ndarray_as.pyarrow_array(np_arr)
+>>> print(pa_arr)
+[
+  0,
+  1,
+  2,
+  3,
+  4
+]
+>>> np_arr[2] = 999    # change numpy array
+>>> print(pa_arr)
+[
+  0,
+  1,
+  999,
+  3,
+  4
+]
+```
+
+## Supported array views - host memory
+
+The following table summarizes the support of creating a specific
+array view (top-row) for the given array storage objects
+(left-hand-side column).
 
 <!--START arrayviews-support_kernel TABLE-->
 <table style="width:100%">
@@ -143,7 +231,7 @@ objects (left-hand-side column).
 2. Results in the parenthesis correspond to objects with nulls or nans. No attempts are made to convert nans to nulls. 
 3. Test arrays are 64-bit float arrays of size 51200.
 
-## Matrix of supported array views - CUDA device memory
+## Supported array views - CUDA device memory
 
 <!--START arrayviews.cuda-support_kernel TABLE-->
 <table style="width:100%">
