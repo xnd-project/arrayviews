@@ -34,7 +34,14 @@ see it happen in future. Meanwhile...
 
 The aim of this project is to establish a connection between different
 data storage object implementations while avoiding copying the data in
-host or device memory.
+host or device memory. The following packages are supported:
+| Package | Tested versions | Storage on host | Storage on CUDA device |
+|---------|-----------------|-----------------|------------------------|
+| numpy   | 1.16.1          | ndarray         | N/A                    |
+| pandas  | 0.24.1          | Series          | N/A                    |
+| pyarrow | 0.12.1.dev120+g7f9... | Array     | cuda.CudaBuffer        |
+| xnd     | 0.2.0dev3       | xnd             | xnd                    |
+| cupy    | 5.2.0           | N/A             | ndarray, cuda.MemoryPointer |
 
 ## Basic usage
 
